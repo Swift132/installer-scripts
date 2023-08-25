@@ -4,7 +4,7 @@ This repository contains two Bash scripts designed to automate software and exte
 
 ## Author
 
-2023 - By João Vieira | `jvieira9` on [GitHub](https://github.com/jvieira9)
+2023 - By João Vieira & Diogo Pacheco | `jvieira9` `Swift132` on [GitHub](https://github.com/jvieira9)
 
 ### Script 1 - software.sh
 

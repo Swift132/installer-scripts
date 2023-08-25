@@ -1,7 +1,15 @@
 #!/bin/bash
-# 2023 - By: João Vieira | 'jvieira9' on GitHub
+# 2023 - By: João Vieira & Diogo Pacheco| 'jvieira9' 'Swift132' on GitHub
 # This script automates the installation of software on an Ubuntu-based system.
 # Softwares: Google Chrome, Visual Studio Code, Git, Docker, Python, Node.js, VirtualBox, VLC, Notepadqq, Discord, KeePass2, Spotify, GIMP.
+
+# Função para verificar privilégios sudo
+verificar_sudo() {
+    if [ "$EUID" -ne 0 ]; then
+        printf "Este script requer privilégios SUDO. Execute o script com 'sudo'.\n"
+        exit 1
+    fi
+}
 
 #function to animate loading. 
 
@@ -38,6 +46,8 @@ spinnerPercentage() {
     printf "    \b\b\b\b"
 }
 
+verificar_sudo
+
 # Remove log files from previous executions of the script
 rm install.log >/dev/null 2>&1
 rm error.log >/dev/null 2>&1
@@ -67,12 +77,12 @@ fi
 # Update the package index, upgrade the system packages to their latest versions and refresh snap packages
 clear
 printf "\033[31mDo you want to upgrade your system packages? \n\033[0m"
-read -p "(Y/n) " confirm
+read -rp "(Y/n) " confirm
 
 if [[ "$confirm" == [yY] || "$confirm" == "" ]]; then
     printf "\033[31mUpdating packages...\n\033[0m"
-    sudo apt update >> install.log 2> error.log && sudo apt-get upgrade -y >> install.log 2> error.log
-    sudo snap refresh >> install.log 2> error.log
+    sudo apt update | sudo tee -a install.log >/dev/null && sudo apt-get upgrade -y | sudo tee -a install.log >/dev/null
+    sudo snap refresh | sudo tee -a install.log >/dev/null 2> error.log
     printf "\033[32mPackages updated successfully.\n\033[0m"
     printf " \n"
 else
@@ -100,20 +110,28 @@ while true; do
         ;;
       "None")
         printf " \n"
-        printf "Exiting without installing any software.\n"
+
+        printf "\033[32m Exiting without installing any software \n\033[0m"
         rm install.log >/dev/null 2>&1
         rm error.log >/dev/null 2>&1
         exit 0
         ;;
       *)
-        # Check if the user has already selected the package. If not, add it to the list of selected packages.
-        if [[ " ${selected[@]} " =~ " ${opt} " ]]; then
-          printf "%s is already selected.\n" "$opt"
-        else
-          selected+=("$opt")
-          printf "\033[32m%s selected.\n\033[0m" "$opt"
-        fi
-        ;;
+          # Verificar se o utilizador já selecionou o pacote. Se não, adicionar à lista de pacotes selecionados.
+          found=false
+          for item in "${selected[@]}"; do
+              if [ "$item" = "$opt" ]; then
+                  found=true
+                  break
+              fi
+          done
+          if [ "$found" = true ]; then
+              printf "%s já foi selecionado.\n" "$opt"
+          else
+              selected+=("$opt")
+              printf "\033[32m%s selecionado.\n\033[0m" "$opt"
+          fi
+          ;;
     esac
   done
 done
@@ -128,7 +146,7 @@ for opt in "${selected[@]}"; do
             printf " \n"
             printf "Installing Google Chrome...\n"
             wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb >> install.log 2> error.log
-            sudo dpkg -i google-chrome-stable_current_amd64.deb >> install.log 2> error.log & spinnerPercentage $!
+            sudo dpkg -i google-chrome-stable_current_amd64.deb | sudo tee -a install.log >/dev/null 2> error.log & spinnerPercentage $!
             printf " \n"
             printf "Google Chrome installed successfully.\n"
             rm google-chrome-stable_current_amd64.deb
@@ -167,7 +185,8 @@ for opt in "${selected[@]}"; do
     ;;
 
     "Docker")
-        # Check if Docker is already installed. If not, download and install it.
+        # Install docker and docker-compose
+        printf "Docker will be avaiable in future versions"
     ;;
 
     "Python")
@@ -294,7 +313,7 @@ sudo apt autoremove -y >> install.log 2> error.log
 
 # Log files
 printf " \n"
-read -p "Would you like to delete the log files created by this script? [Y/n]" log
+read -rp "Would you like to delete the log files created by this script? [Y/n]" log
 if [[ "$log" == [yY] || "$log" == "" ]]; then
         rm install.log >/dev/null 2>&1
         rm error.log >/dev/null 2>&1

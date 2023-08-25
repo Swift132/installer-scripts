@@ -21,6 +21,16 @@ if ! ping -c 2 google.com >> extensions-install.log 2> extensions-error.log && !
     exit 1
 fi
 
+
+
+
+
+
+
+
+
+
+
 # VS Code check
 if ! command -v code &> /dev/null; then
     printf "Visual Studio Code is not installed. Aborting.\n"
