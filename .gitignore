@@ -1,2 +1,4 @@
 .prettierrc
 .idea
+error.log
+install.log
